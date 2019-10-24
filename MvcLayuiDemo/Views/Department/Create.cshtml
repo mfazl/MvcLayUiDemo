@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "创建部门";
+    Layout = "~/Views/Shared/_ManageLayoutPage.cshtml";
+}
+<blockquote class="layui-elem-quote blog-manage-breadcrumb">
+    <span class="layui-breadcrumb">
+        <a href="@Url.Action("List","Department")">部门管理</a>
+        <a><cite>创建部门</cite></a>
+    </span>
+</blockquote>
+@if (ViewBag.IsError != null && ViewBag.IsError)
+{
+    <div style="background-color:#f2dede; border-color:#ebccd1; color:#a94442; padding:15px; border-radius:5px; position:relative;">
+        <p><strong>错误信息：</strong>部门名称过长，请控制在15个字内！</p>
+        <a href="javascript:;" style="position: absolute;right: 18px; top: 17px;"><i class="layui-icon">&#x1006;</i></a>
+    </div>
+}
+<fieldset class="layui-elem-field layui-field-title">
+    <legend>创建部门</legend>
+</fieldset>
+
+@using (Html.BeginForm("Create", "Department", FormMethod.Post, new { @class = "layui-form blog-manage-form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">部门编码</label>
+        <div class="layui-input-block">
+            <input type="text" name="DepartmentNo" lay-verify="DepartmentNo" autocomplete="off" placeholder="请输入部门编码..." class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">部门名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="DepartmentName" lay-verify="DepartmentName" autocomplete="off" placeholder="请输入部门名称..." class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入备注内容" name="Remarks" lay-verify="Remarks" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit>立即保存</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+}
+@section scripts{
+    <script>
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form
+            , layer = layui.layer
+            , $ = layui.jquery;
+            var laydate = layui.laydate;
+
+            //常规用法
+            laydate.render({
+                elem: '#datetime'
+            });
+
+            //自定义验证规则
+            form.verify({
+                DepartmentName: function (value) {
+                    if (value === '') {
+                        return '部门名称不能为空！';
+                    }
+                    if (value.length > 15) {
+                        return '部门名称太长啦，请控制在15个字内';
+                    }
+                    var message = '';
+                    $.ajax({
+                        async: false, //改为同步请求
+                        url: '@Url.Action("CheckDepartmentNo", "Department")',
+                        data: {
+                            EmployeeNo: value
+                        },
+                        dataType: 'json',
+                        type: 'get',
+                        success: function (result) {
+                            if (result.success)
+                                message = result.message;
+                        }
+                    });
+                    if (message !== '')
+                        return message;
+                }
+            });
+            var $item = $('.layui-nav > .layui-nav-item');
+            $item.removeClass('layui-this').eq(2).addClass('layui-this');
+        });
+    </script>
+}
+

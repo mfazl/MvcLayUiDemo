@@ -1,0 +1,200 @@
+﻿@{
+    ViewBag.Title = "员工列表";
+    Layout = "~/Views/Shared/_ManageLayoutPage.cshtml";
+}
+
+@model List<Model.EmployeeInfo>
+<blockquote class="layui-elem-quote">
+    <a href="@Url.Action("Create","Employee")" class="layui-btn"><i class="layui-icon">&#xe61f;</i> 员工</a>
+
+</blockquote>
+
+<div class="blog-manage-table table-responsive">
+    <table class="table table-hover table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>部门名称</th>
+                <th>员工编码</th>
+                <th>员工名称</th>
+                <th>员工生日</th>
+                <th>员工性别</th>
+                <th>是否在职</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var item in Model)
+                {
+            <tr>
+                <td>@item.DepartmentId</td>
+                <td>@item.EmployeeNo</td>
+                <td>@item.EmployeeName</td>
+                <td>@item.EmployeeBirth</td>
+                <td>@item.EmployeeSex</td>
+                <td>@item.IsJobTra</td>
+                <td>@item.Remarks</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Employee", new { id = item.Id })">编辑</a>
+                    <a href="@Url.Action("Delete", "Employee",new { id = item.Id })" data-id="@item.Id" data-options="del" data-name="@item.EmployeeName">删除</a>
+                </td>
+            </tr>
+                }
+            }
+            else
+            {
+
+                <tr>
+                    <td style="text-align:center;" colspan="6">暂无数据</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="blog-manage-page">
+        <div id="page" style="padding-left:20px;"></div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        layui.use(['layer'], function () {
+            var layer = layui.layer
+            , $ = layui.jquery;
+
+            $('a[data-options=del]').each(function () {
+                var $this = $(this);
+
+                $this.on('click', function () {
+                    var id = $this.data('id');
+                    var name = $this.data('EmployeeName');
+                    var msg = '你真的要把  <span style="color:red;">' + name + '</span> 给删除吗？<img src="' + location.origin + '/Content/layui/images/face/4.gif" alt="[可怜]">'
+                    var title = '萌萌的提示<img src="' + location.origin + '/Content/layui/images/face/7.gif" alt="[害羞]">'
+                    layer.confirm(msg, { icon: 3, title: title }, function (index) {
+                        var params = {
+                            t: Math.random(),
+                            id: id
+                        };
+                        $.post('@Url.Action("Delete", "Employee")', params, function (result) {
+
+                            if (result.success) {
+                                layer.msg(result.message, { icon: 1 }, function (index) {
+                                    location.reload();
+                                });
+                            }
+                            else {
+                                layer.msg(result.message, { icon: 2 });
+                            }
+
+                        }, 'json');
+                        layer.close(index);
+                    });
+                });
+            });
+            var $item = $('.layui-nav > .layui-nav-item');
+            $item.removeClass('layui-this').eq(2).addClass('layui-this');
+
+
+        });
+
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*<table id="emplist" lay-filte="emptest"></table>*@
+@*<script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>*@
+@*<script>
+        layui.use('table', function () {
+            var table = layui.table;
+
+            //第一个实例
+            table.render({
+                elem: '#emplist'
+                , height: 312
+                , url: '/Employee/empList' //数据接口
+                , method: "get"
+                , parseData: function (res) {
+                    return {
+                        "code": 0,
+                        "msg": "",
+                        "count": 5,
+                        "data": res
+                    }
+                }
+                , page: true //开启分页
+                , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                , totalrow: true //开启合计行
+                , cols: [[ //表头
+                    { type: 'checkbox', fixed: 'left' }
+                    , { field: 'DepartmentId', title: '部门编号', width: 150, sort: true, fixed: 'left' }
+                    , { field: 'EmployeeNo', title: '员工编号', width: 150 }
+                    , { field: 'EmployeeName', title: '员工姓名', width: 150 }
+                    , { field: 'EmployeeSex', title: '员工性别', width: 150 }
+                    , { field: 'EmployeeBirth', title: '员工生日', width: 177 }
+                    , { field: 'IsJob', title: '是否在职', width: 150, sort: true }
+                    , { field: 'Remarks', title: '备注', width: 150 }
+                    , { fixed: 'right', width: 165, align: 'center', toolbar: '#barDemo' }
+
+                ]]
+            });
+            //监听头工具栏事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id)
+                    , data = checkStatus.data; //获取选中的数据
+                switch (obj.event) {
+                    case 'add':
+                        layer.msg('添加');
+                        break;
+                    case 'update':
+                        if (data.length === 0) {
+                            layer.msg('请选择一行');
+                        } else if (data.length > 1) {
+                            layer.msg('只能同时编辑一个');
+                        } else {
+                            layer.alert('编辑 [id]：' + checkStatus.data[0].id);
+                        }
+                        break;
+                    case 'delete':
+                        if (data.length === 0) {
+                            layer.msg('请选择一行');
+                        } else {
+                            layer.msg('删除');
+                        }
+                        break;
+                };
+            });
+            //监听行工具事件
+            table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                var data = obj.data //获得当前行数据
+                    , layEvent = obj.event; //获得 lay-event 对应的值
+                if (layEvent === 'detail') {
+                    layer.msg('查看操作');
+                } else if (layEvent === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        obj.del(); //删除对应行（tr）的DOM结构
+                        layer.close(index);
+                        //向服务端发送删除指令
+                    });
+                } else if (layEvent === 'edit') {
+                    layer.msg('编辑操作');
+                }
+            });
+        });
+    </script>*@
+

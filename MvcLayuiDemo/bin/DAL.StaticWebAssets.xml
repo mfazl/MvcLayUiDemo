@@ -1,0 +1,4 @@
+﻿<StaticWebAssets Version="1.0">
+  <ContentRoot BasePath="_content/Commom" Path="F:\mfDemo\MvcLayuiDemo\Commom\wwwroot\" />
+  <ContentRoot BasePath="_content/Entity" Path="F:\mfDemo\MvcLayuiDemo\Entity\wwwroot\" />
+</StaticWebAssets>
